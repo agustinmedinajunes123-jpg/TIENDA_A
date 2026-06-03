@@ -1,0 +1,221 @@
+from flask import Flask, render_template_string, request
+
+app = Flask(__name__)
+
+# --- BLOQUE DE DISEÑO HTML ---
+PAGINA_HTML = """
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soporte Técnico y Ciberseguridad</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; color: #333; }
+        header { background-color: #0056b3; color: white; padding: 15px; text-align: center; }
+        nav ul { list-style: none; padding: 0; }
+        nav ul li { display: inline; margin: 0 10px; }
+        nav ul li a { color: white; text-decoration: none; font-weight: bold; cursor: pointer; }
+        nav ul li a:hover { text-decoration: underline; }
+        
+        /* Contenedores Principales de Secciones */
+        .seccion-contenido { display: block; }
+        .oculto { display: none !important; }
+
+
+        .contenedor-tarjetas { display: flex; gap: 20px; margin-top: 20px; }
+        .tarjeta { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; }
+        
+        .galeria { display: flex; gap: 15px; margin-top: 20px; justify-content: space-between; }
+        .galeria img { width: 32%; height: 200px; border-radius: 8px; object-fit: cover; }
+        
+        /* Estilos del Catálogo de Productos (5 Productos) */
+        .titulo-seccion-productos { margin-top: 20px; color: #0056b3;text-align: center; }
+        .catalogo-grid { display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
+        .producto-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: calc(33.333% - 14px); box-sizing: border-box; text-align: center; min-width: 250px; }
+        .producto-card img { width: 40%; height: 160px; border-radius: 6px;object-fit: contain;    /* Minimiza la imagen completa para que entre entera sin cortes */
+    background-color: #f8f9fa;}
+        .producto-card h3 { font-size: 1.15rem; margin: 12px 0 6px 0; }
+        .producto-card p { font-size: 0.9rem; color: #666; min-height: 45px; margin-bottom: 10px; }
+        .precio { display: block; font-weight: bold; color: #28a745; font-size: 1.2rem; margin-bottom: 15px; }
+        .btn-consultar { background-color: #0056b3; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.9rem; width: 100%; box-sizing: border-box; }
+        .btn-consultar:hover { background-color: #004085; }
+
+        /* Contacto Simple */
+        .contacto-simple { margin-top: 40px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .info-contacto { display: flex; gap: 30px; margin-bottom: 20px; font-size: 1.1rem; }
+        .info-contacto i { color: #0056b3; margin-right: 8px; }
+        
+        form label { font-weight: bold; display: block; margin-top: 10px; }
+        form input[type="text"], form textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        form input[type="submit"] { background-color: #0056b3; color: white; border: none; padding: 10px; margin-top: 15px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1rem; }
+        form input[type="submit"]:hover { background-color: #004085; }
+        .alerta { background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Soluciones Tecnológicas y Ciberseguridad</h1>
+        <nav>
+            <ul>
+                <li><a id="enlace-inicio">Inicio / Servicios</a></li>
+                <li><a id="enlace-productos">Productos</a></li>
+                <li><a id="enlace-contacto">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+        <!-- VISTA DE INICIO Y SERVICIOS -->
+        <div id="vista-inicio" class="seccion-contenido">
+            <section class="contenedor-tarjetas">
+                <article class="tarjeta">
+                    <h2>Limpieza de Celular</h2>
+                    <p>Mantenimiento integral interno y externo para smartphones. Eliminamos residuos de polvo en puertos de carga, altavoces y ranuras.</p>
+                </article>
+                <article class="tarjeta">
+                    <h2>Mantenimiento de PC y Laptops</h2>
+                    <p>Limpieza profunda preventiva y correctiva de componentes para equipos de escritorio y portátiles. Incluye remoción de polvo en fuentes, ventiladores, cambio de pasta térmica y limpieza de pantallas.</p>
+                </article>
+                <article class="tarjeta">
+                    <h2>Ciberseguridad y Software</h2>
+                    <p>Eliminación de virus, malware y optimización del sistema operativo. Instalación de software esencial y configuración de respaldos de seguridad para proteger tus datos.</p>
+                </article>
+            </section>
+            
+            <section class="galeria">
+                <img src="https://forjandoelfuturo.com.ar/wp-content/uploads/2021/12/celulares-768x512.jpg" alt="Limpieza de celular">
+                <img src="https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=1000" alt="Limpieza de computadoras">
+                <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=1000" alt="Ciberseguridad y software">
+            </section>
+        </div>
+
+
+        <!-- VISTA DE PRODUCTOS (Se oculta al cargar la página por defecto) -->
+        <div id="vista-productos" class="seccion-contenido oculto">
+            <h2 class="titulo-seccion-productos">Nuestro Catálogo de Productos </h2>
+            <p>Encuentra las mejores herramientas y accesorios para el cuidado y protección de tus equipos.</p>
+            
+            <section class="catalogo-grid">
+                <!-- Producto 1 -->
+                <article class="producto-card">
+                    <img src="https://tse2.mm.bing.net/th/id/OIP.HIjpv7qfuNAdy4eQDE-oewHaHa?r=0&cb=thfc1falcon&w=1600&h=1600&rs=1&pid=ImgDetMain&o=7&rm=3">
+                    <h3>Kit de Limpieza Antiestático</h3>
+                    <p>Líquido limpiador especializado + paño de microfibra premium para pantallas y teclados.</p>
+                    <span class="precio">S/. 25.00</span>
+                    <button class="btn-consultar">Consultar Stock</button>
+                </article>
+                
+                <!-- Producto 2 -->
+                <article class="producto-card">
+                    <img src="https://m.media-amazon.com/images/I/61h4Ql69VlL._AC_SL1500_.jpg">
+                    <h3>Aire Comprimido en Aerosol</h3>
+                    <p>Remueve con fuerza el polvo acumulado en zonas difíciles como fuentes de poder y ventiladores.</p>
+                    <span class="precio">S/. 30.00</span>
+                    <button class="btn-consultar">Consultar Stock</button>
+                </article>
+                
+                <!-- Producto 3 -->
+                <article class="producto-card">
+                    <img src="https://promart.vteximg.com.br/arquivos/ids/6896880-1000-1000/image-9493404ae58d4331a5ad49f49fd95141.jpg?v=638169076099400000">
+                    <h3>Base Refrigerante para Laptop</h3>
+                    <p>Soporte ergonómico con potentes ventiladores silenciosos para reducir el calentamiento.</p>
+                    <span class="precio">S/. 65.00</span>
+                    <button class="btn-consultar">Consultar Stock</button>
+                </article>
+
+                <!-- Producto 4 -->
+                <article class="producto-card">
+                    <img src="https://mmartec.pe/wp-content/uploads/2025/02/D_NQ_NP_756466-MLU75809034186_042024-O-1.webp">
+                    <h3>Pasta Térmica de Alta Densidad</h3>
+                    <p>Compuesto térmico de alta calidad para procesadores de PC y Laptops. Mejora la refrigeración.</p>
+                    <span class="precio">S/. 35.00</span>
+                    <button class="btn-consultar">Consultar Stock</button>
+                </article>
+
+                <!-- Producto 5 -->
+                <article class="producto-card">
+                    <img src="https://images-na.ssl-images-amazon.com/images/I/615I4OBtVtL._AC_UL375_SR375,375_.jpg">
+                    <h3>Kit de Cubiertas para Webcam (3 un.)</h3>
+                    <p>Mini tapas deslizantes ultra delgadas para proteger tu privacidad y seguridad física contra espías.</p>
+                    <span class="precio">S/. 15.00</span>
+                    <button class="btn-consultar">Consultar Stock</button>
+                </article>
+            </section>
+        </div>
+
+
+        <!-- FORMULARIO DE CONTACTO (Se mantiene visible o accesible al dar clic) -->
+        <section id="seccion-contacto" class="contacto-simple">
+            <h2>Contáctanos</h2>
+            
+            <div class="info-contacto">
+                <div><i class="fa-solid fa-phone"></i> <strong>Teléfono:</strong> +51 987 654 321</div>
+                <div><i class="fa-solid fa-envelope"></i> <strong>Correo:</strong> soporte@misitioweb.com</div>
+                <div><i class="fa-solid fa-location-dot"></i> <strong>Ubicación:</strong> San Juan de Lurigancho</div>
+            </div>
+            
+            <form action="" method="POST">
+                {% if mensaje_confirmacion %}
+                    <div class="alerta">
+                        {{ mensaje_confirmacion }}
+                    </div>
+                {% endif %}
+                
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" required>
+                
+                <label for="mensaje">Mensaje:</label>
+                <textarea id="mensaje" name="mensaje" rows="3" required></textarea>
+                
+                <input type="submit" value="Enviar Mensaje">
+            </form>
+        </section>
+    </main>
+    <footer>
+        <br>
+        <p>&copy; 2026 Mi sitio web. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        const enlaceInicio = document.getElementById('enlace-inicio');
+        const enlaceProductos = document.getElementById('enlace-productos');
+        const enlaceContacto = document.getElementById('enlace-contacto');
+
+        const vistaInicio = document.getElementById('vista-inicio');
+        const vistaProductos = document.getElementById('vista-productos');
+        const seccionContacto = document.getElementById('seccion-contacto');
+
+        // Al hacer clic en Inicio
+        enlaceInicio.addEventListener('click', function() {
+            vistaInicio.classList.remove('oculto');
+            vistaProductos.classList.add('oculto');
+        });
+
+        // Al hacer clic en Productos
+        enlaceProductos.addEventListener('click', function() {
+            vistaProductos.classList.remove('oculto');
+            vistaInicio.classList.add('oculto');
+        });
+
+        // Al hacer clic en Contacto (hace scroll suave hacia el formulario abajo)
+        enlaceContacto.addEventListener('click', function() {
+            seccionContacto.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
+"""
+@app.route("/", methods=["GET", "POST"])
+def inicio():
+    mensaje = None
+    if request.method == "POST":
+        nombre_usuario = request.form["nombre"]
+        mensaje = f"¡Gracias {nombre_usuario}! Hemos recibido tu mensaje."
+    return render_template_string(PAGINA_HTML, mensaje_confirmacion=mensaje)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
